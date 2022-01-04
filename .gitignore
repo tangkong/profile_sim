@@ -1,0 +1,11 @@
+__pycache__/
+.vscode/
+.idea/
+*.pyc
+*.egg-info/
+*.egg
+
+.logs/
+.metadata.md/
+
+history.sqlite
