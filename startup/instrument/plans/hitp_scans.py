@@ -3,15 +3,12 @@ scans for high throughput stage
 """
 
 from .locs import loc177
-#from ..devices.stages import s_stage
-from ophyd.sim import motor1,motor2
-#from ..devices.xspress3 import xsp3
-#from ..devices.pilatus import pilDet
-from ophyd.sim import det as pilDet
-#from ..devices.misc_devices import shutter as fs, lrf, I0, I1, table_busy, table_trigger
-#from ..framework import db
+# from ..devices.stages import s_stage
+from ..devices.simdet import pilDet, xsp3
+from ..devices.misc_devices import I0, I1, shutter as fs, table_busy, table_trigger
+from ..framework import db
 from .adapt_opt import align_wafer
-from .helpers import home,wafer1,wafer2
+from .helpers import home, wafer1, wafer2   
 
 import time 
 import matplotlib.pyplot as plt

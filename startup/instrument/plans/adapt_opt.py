@@ -6,10 +6,10 @@ import pandas as pd
 
 import bluesky.plan_stubs as bps
 import bluesky.plans as bp
-#from bluesky_live.bluesky_run import BlueskyRun, DocumentCache
+from bluesky_live.bluesky_run import BlueskyRun, DocumentCache
 
-#from ..framework import db
-#from ..devices.misc_devices import filter1, filter2, filter3, filter4
+from ..framework import db
+from ..devices.misc_devices import filter1, filter2, filter3, filter4
 from .helpers import home
 
 __all__ = ['align_wafer','filter_opt_count', 'solve_filter_setup','filter_thicks', 'filter_hist']
