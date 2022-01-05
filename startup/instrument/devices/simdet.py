@@ -1,6 +1,6 @@
 from ophyd.sim import det
 
-all = ['ptDet', 'pilDet',]
+all = ['ptDet', 'pilDet', 'xsp3']
 
 ptDet = det
 
@@ -15,8 +15,9 @@ from ophyd.sim import SynSignal
 from ophyd.areadetector.filestore_mixins import resource_factory
 
 import tifffile
+import h5py 
 
-# Basic signals 
+# Basic signals for simulated area detectors
 class SynTiffFilestore(SynSignal):
     def trigger(self):
         # not running at the moment.... but super.trigger() is.  
@@ -49,6 +50,42 @@ class SynTiffFilestore(SynSignal):
         fpath = Path(resource['root']) / resource['resource_path'] / fname
         # for tiff spec
         tifffile.imsave(fpath, val)
+        
+        # replace 'value' in read dict with some datum id
+        ret[self.name]['value'] = datum['datum_id']
+        self._last_ret = ret
+        return st
+
+class SynHDF5Filestore(SynSignal):
+    def trigger(self):
+        # not running at the moment.... but super.trigger() is.  
+        tmpRoot = Path(self.fstore_path)
+        tmpPath = 'tmp'
+        os.makedirs(tmpRoot / tmpPath, exist_ok=True)
+        st = super().trigger() # re-evaluates self._func, puts into value
+        # Returns NullType
+        ret = super().read()    # Signal.read() exists, not SynSignal.read()
+        # But using Signal.read() does not allow uid's to be passed into mem.
+        val = ret[self.name]['value']
+
+        self.point_number += 1 
+        fn = f'{uuid.uuid4()}.h5'
+        resource, datum_factory = resource_factory(
+                spec='XSP3',
+                root=tmpRoot,
+                resource_path=tmpRoot / tmpPath / fn,
+                resource_kwargs={}, # Handler takes only one 'filename' argument, which is pulled from the... 
+                path_semantics='windows')
+        datum = datum_factory({})
+        print(resource)     
+        self._asset_docs_cache.append(('resource', resource))
+        self._asset_docs_cache.append(('datum', datum))
+
+        fpath = Path(resource['root']) / resource['resource_path']
+        # for h5 spec
+        with h5py.File(fpath, 'w') as f:
+            e = f.create_group('/entry/instrument/detector')
+            dset = e.create_dataset('data', data=val)
         
         # replace 'value' in read dict with some datum id
         ret[self.name]['value'] = datum['datum_id']
@@ -122,6 +159,10 @@ def xsp3_func():
 class SynMar(ArraySynSignal, SynTiffFilestore):
     pass
 
+class SynXsp3(ArraySynSignal, SynHDF5Filestore):
+    pass
+
 fpath = Path(os.getcwd()) / 'fstore'
 print(f'Filestore path: {fpath}')
 pilDet = SynMar(name='pilatus1M_image', fstore_path=fpath, func=p1M_func)
+xsp3 = SynXsp3(name='Xspress3EXAMPLE', fstore_path=fpath, func=xsp3_func)
