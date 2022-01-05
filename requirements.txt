@@ -1,0 +1,6 @@
+bluesky
+ophyd
+matplotlib
+tifffile
+ssrltools
+bluesky_live
